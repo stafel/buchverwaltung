@@ -1,3 +1,6 @@
+import 'package:buchverwaltung/datenbank.dart';
+import 'package:logging/logging.dart';
+
 enum Genre { fiction, history, nonfiction }
 
 // Model eines Buches
@@ -14,28 +17,42 @@ class Buch {
 
   Buch.voll(this.name, this.authoren, this.isbn, this.seitenAnzahl,
       this.version, this.erscheinungsdatum, this.genre);
+
+  @override
+  String toString() {
+    if (version == null && isbn == null) {
+      return 'Buch [$name $authoren $genre]';
+    }
+    return 'Buch [$name $authoren $genre $isbn $seitenAnzahl $version ${erscheinungsdatum?.toIso8601String()}]';
+  }
 }
 
 // Data access object für Bücher
 class Buecherei {
-  // Momentan ohne DB
-  List<Buch> buecher = [];
+
+  late Datenbank _db;
+  final _log = Logger('Buecherei');
+
+  Buecherei.injected(this._db);
 
   Buecherei.dummy() {
-    /** Add dummy books for local testing */
-    buecher.add(Buch.minimal(
-        "Grimms Maerchen", ["A. Grimm", "B. Grimm"], Genre.fiction));
-    buecher.add(Buch.voll("A Hacker's Mind", ["Bruce Schneier"],
-        "978-0-393-86666-7", 284, 1, DateTime(2023, 10, 17), Genre.nonfiction));
+    _db = Datenbank.dummy();
   }
 
-  hinzufuege(Buch buch) {}
-
-  Buch lesen() {
-    return Buch.minimal("n", [], Genre.fiction);
+  hinzufuege(Buch buch) async {
+    await _db.create(buch);
   }
 
-  List<Buch> suchen() {
-    return [];
+  loeschen(Buch buch) async {
+    await _db.delete(buch);
+  }
+
+  Future<List<Buch>> suchen({String? name, List<String>? author, Genre? genre, String? isbn}) async {
+    if (name == null && author == null && genre == null && isbn == null) {
+      return await _db.listAll();
+    }
+    else {
+      return await _db.query(name: name, author: author, genre: genre, isbn: isbn);
+    }
   }
 }
