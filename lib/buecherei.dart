@@ -47,6 +47,7 @@ class Buecherei {
     await _db.delete(buch);
   }
 
+  // suchen ohne parameter gibt ganzen db inhalt zurück
   Future<List<Buch>> suchen({String? name, List<String>? author, Genre? genre, String? isbn}) async {
     if (name == null && author == null && genre == null && isbn == null) {
       return await _db.listAll();

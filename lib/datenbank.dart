@@ -43,6 +43,7 @@ class Datenbank {
     );
   }
 
+  // eigentliches suchquery zur einfacheren handhabung aus dem future delayed ausgelagert
   List<Buch> _query({String? name, List<String>? author, Genre? genre, String? isbn}) {
     List<Buch> matching = [];
 
